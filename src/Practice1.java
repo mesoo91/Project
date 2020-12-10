@@ -18,8 +18,6 @@ public class Practice1 {
 
         printRanged(text, N, text.length);
         printRanged(text, 0, N);
-
-        //asdfX
     }
 
     public static void printRanged(char[] text, int start, int finish) {
