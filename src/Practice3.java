@@ -60,19 +60,23 @@ public class Practice3 {
                 break;
             }
 
-            String[] commands = Practice2.split(input); // Practice2의 코드를 그대로 사용
+            String[] commands = split(input); // Practice2의 코드를 비슷하게 사용 (U2같은 경우를 위한)
             for (int i = 0; i < commands.length; i++) {
                 String command = commands[i];
+                boolean twice = command.length() == 2 && command.charAt(1) == '2';
+                boolean left = command.length() == 1 || twice;
 
-                boolean left = command.length() == 1;
+                int loopCount = twice ? 2 : 1;
 
-                switch (command.charAt(0)) {
-                    case 'U': swap(horizontal, 0, true, left); break;
-                    case 'D': swap(horizontal, 2, true, !left); break;
-                    case 'L': swap(verticalFront, 0, false, !left); break;
-                    case 'R': swap(verticalFront, 2, false, left); break;
-                    case 'B': swap(verticalSide, 0, true, left); break;
-                    case 'F': swap(verticalSide, 2, true, !left); break;
+                for(int c = 0; c < loopCount; c++) { // U2같은 명령어 인 경우는 루프를 두번 굴림
+                    switch (command.charAt(0)) {
+                        case 'U': swap(horizontal, 0, true, left); break;
+                        case 'D': swap(horizontal, 2, true, !left); break;
+                        case 'L': swap(verticalFront, 0, false, !left); break;
+                        case 'R': swap(verticalFront, 2, false, left); break;
+                        case 'B': swap(verticalSide, 0, true, left); break;
+                        case 'F': swap(verticalSide, 2, true, !left); break;
+                    }
                 }
 
                 System.out.println(command);
@@ -169,6 +173,35 @@ public class Practice3 {
                 cube[y][point.x + line] = str[start++];
             }
         }
+    }
+
+    public static String[] split(String input) {
+        int specialCase = 0;
+        for(int i = 0; i < input.length(); i++) {
+            if(input.charAt(i) == '\'' || input.charAt(i) == '2') specialCase++;
+        }
+
+        String buffer = "";
+        String[] arr = new String[input.length() - specialCase];
+        int index = 0;
+
+        for(int i = 0; i < input.length(); i++) {
+            char ch = input.charAt(i);
+
+            if(ch == '\'' || ch == '2') {
+                arr[index++] = buffer + ch;
+                buffer = "";
+            } else {
+                if(buffer.length() > 0) arr[index++] = buffer;
+                buffer = String.valueOf(ch);
+            }
+        }
+
+        if(buffer.length() > 0) { // not empty?
+            arr[index] = buffer;
+        }
+
+        return arr;
     }
 
     public static void printCube() {
