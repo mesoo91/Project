@@ -17,3 +17,5 @@ Practice2.java
 
 Practice1.java와 비슷하게 getAdpatedIndex를 이용하여 적절하게 left, right에 따라 큐브를 스왑한다.
 다만 여기에서 좀 더 편하게 구현하기 위해(horizontal, vertical에 상관 없이 구현하기 위하여) String[] str을 임시로 생성하고, 배열에서 적당히 조작(스왑)한 다음 다시 cube 변수에 넣어주도록 한다.
+
+또한 split을 구현한 이유는 단순히 String을 받아서 인덱스에 따라 명령어를 주면 되기도 하지만 '이 있는 경우 UUR, U'UR등의 구분이 필요하므로 split 코드를 따로 작성하게 되었다.
