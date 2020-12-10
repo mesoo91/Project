@@ -4,20 +4,27 @@ public class Practice1 {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
 
-        String text = scan.next();
-        int N = scan.nextInt();
+        char[] text = scan.next().toCharArray();
+        int N = getAdaptedIndex(scan.nextInt(), text.length);
         String direction = scan.next(); // is L or R?
 
-        int c = 0;
-
-        while(c < text.length()) {
-            int index = c + N;
-            if(direction.equals("R")) {
-                index = text.length() - index;
+        if(direction.equalsIgnoreCase("L")) {
+            for(int i = N; i < text.length; i++) {
+                System.out.print(text[i]);
             }
-            System.out.print(index);
-            System.out.print(text.charAt(index % text.length()));
-            c++;
+            for(int i = 0; i < N; i++) {
+                System.out.print(text[i]);
+            }
+        } else {
+
         }
+    }
+
+    public static void printRanged(char[] text, int start, int finish) {
+
+    }
+
+    public static int getAdaptedIndex(int index, int mod) {
+        return ((index % mod) + mod) % mod;
     }
 }
