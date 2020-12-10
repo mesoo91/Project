@@ -50,6 +50,7 @@ public class Practice3 {
 
         Scanner scan = new Scanner(System.in);
 
+        printCube();
         while (true) {
             System.out.print("CUBE > ");
             String input = scan.next();
@@ -66,16 +67,12 @@ public class Practice3 {
                 boolean left = command.length() == 1;
 
                 switch (command.charAt(0)) {
-                    case 'U':
-                        break;
-                    case 'D':
-                        break;
-                    case 'L':
-                        break;
-                    case 'R':
-                        break;
-                    case 'B':
-                        break;
+                    case 'U': swap(horizontal, 0, true, left); break;
+                    case 'D': swap(horizontal, 2, true, !left); break;
+                    case 'L': swap(verticalFront, 0, false, !left); break;
+                    case 'R': swap(verticalFront, 2, false, left); break;
+                    case 'B': swap(verticalSide, 0, true, left); break;
+                    case 'F': swap(verticalSide, 2, true, !left); break;
                 }
 
                 System.out.println(command);
@@ -85,17 +82,92 @@ public class Practice3 {
         }
     }
 
-    public static void swap(RelatedData data, int overallLine, boolean overallDirection, boolean left) {
+    public static void swap(RelatedData data, int overallLine, boolean overallhorizontal, boolean left) {
         String[] str = new String[12];
         String[] result = new String[12];
 
-        int N = Practice1.getAdaptedIndex(left ? 3 : -3, 12); // Practice1의 코드 재사용 / 3개만큼 밀어내고, 12개를 기준으로 한다.
-
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < 4; i++) { // 읽어서 str에 저장
             int plate = data.relatedIndices[i];
             int line = data.lines[i] ? 2 - overallLine : overallLine;
             boolean reversed = data.reversed[i];
-            boolean directionChanged = data.directionChanged[i];
+            boolean horizontal = data.directionChanged[i] != overallhorizontal;
+
+            Point point = points[plate];
+
+            readThreeFromCube(str, i * 3, point, line, horizontal, reversed);
+        }
+
+        int N = Practice1.getAdaptedIndex(left ? 3 : -3, 12); // Practice1의 코드 재사용 / 3개만큼 밀어내고, 12개를 기준으로 한다.
+
+        int c = 0; // str을 밀어서 result에 저장
+        for(int i = N; i < 12; i++) {
+            result[c++] = str[i];
+        }
+        for(int i = 0; i < N; i++) {
+            result[c++] = str[i];
+        }
+
+        for(int i = 0; i < 4; i++) { // 위에서 읽은 그대로 재배열
+            int plate = data.relatedIndices[i];
+            int line = data.lines[i] ? 2 - overallLine : overallLine;
+            boolean reversed = data.reversed[i];
+            boolean horizontal = data.directionChanged[i] != overallhorizontal;
+
+            Point point = points[plate];
+
+            writeThreeFromCube(result, i * 3, point, line, horizontal, reversed);
+        }
+    }
+
+    public static void readThreeFromCube(String[] str, int start, Point point, int line, boolean horizontal, boolean reversed) {
+        if(horizontal && !reversed) {
+            for(int x = point.x; x < point.x + 3; x++) {
+                str[start++] = cube[point.y + line][x];
+            }
+        }
+
+        if(horizontal && reversed) {
+            for(int x = point.x + 3 - 1; x >= point.x; x--) {
+                str[start++] = cube[point.y + line][x];
+            }
+        }
+
+        if(!horizontal && !reversed) {
+            for(int y = point.y; y < point.y + 3; y++) {
+                str[start++] = cube[y][point.x + line];
+            }
+        }
+
+        if(!horizontal && reversed) {
+            for(int y = point.y + 3 - 1; y >= point.y; y--) {
+                str[start++] = cube[y][point.x + line];
+            }
+        }
+    }
+
+    public static void writeThreeFromCube(String[] str, int start, Point point, int line, boolean horizontal, boolean reversed) {
+        if(horizontal && !reversed) {
+            for(int x = point.x; x < point.x + 3; x++) {
+                cube[point.y + line][x] = str[start++];
+            }
+        }
+
+        if(horizontal && reversed) {
+            for(int x = point.x + 3 - 1; x >= point.x; x--) {
+                cube[point.y + line][x] = str[start++];
+            }
+        }
+
+        if(!horizontal && !reversed) {
+            for(int y = point.y; y < point.y + 3; y++) {
+                cube[y][point.x + line] = str[start++];
+            }
+        }
+
+        if(!horizontal && reversed) {
+            for(int y = point.y + 3 - 1; y >= point.y; y--) {
+                cube[y][point.x + line] = str[start++];
+            }
         }
     }
 
