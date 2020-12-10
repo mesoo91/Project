@@ -41,11 +41,11 @@ public class Practice2 {
 
     public static void swap(int line, boolean horizontal, boolean left) {
         String[] str = new String[3];
-        if(horizontal) {
-            for(int i = 0; i < 3; i++) {
-                str[i] = cube[line][i];
-            }
-        }
+//        if(horizontal) {
+//            for(int i = 0; i < 3; i++) {
+//                str[i] = cube[line][i];
+//            }
+//        }
 
         int N = Practice1.getAdaptedIndex(left ? 1 : -1, 3); // Practice1의 코드 재사용
 
