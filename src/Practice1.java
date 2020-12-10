@@ -1,3 +1,5 @@
+
+
 import java.util.Scanner;
 
 public class Practice1 {
@@ -5,23 +7,25 @@ public class Practice1 {
         Scanner scan = new Scanner(System.in);
 
         char[] text = scan.next().toCharArray();
-        int N = getAdaptedIndex(scan.nextInt(), text.length);
+        int N = scan.nextInt();
         String direction = scan.next(); // is L or R?
 
-        if(direction.equalsIgnoreCase("L")) {
-            for(int i = N; i < text.length; i++) {
-                System.out.print(text[i]);
-            }
-            for(int i = 0; i < N; i++) {
-                System.out.print(text[i]);
-            }
-        } else {
-
+        if(direction.equalsIgnoreCase("R")) {
+            N *= -1;
         }
+
+        N = getAdaptedIndex(N, text.length);
+
+        printRanged(text, N, text.length);
+        printRanged(text, 0, N);
+
+        //asdfX
     }
 
     public static void printRanged(char[] text, int start, int finish) {
-
+        for(int i = start; i < finish; i++) {
+            System.out.print(text[i]);
+        }
     }
 
     public static int getAdaptedIndex(int index, int mod) {
