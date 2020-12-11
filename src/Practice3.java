@@ -1,4 +1,4 @@
-import java.util.Scanner;
+import java.util.*;
 
 public class Practice3 {
     static String[][] cube = { // 자주 사용하는 변수이므로 어쩔 수 없이 전역변수 사용
@@ -13,45 +13,77 @@ public class Practice3 {
             {" ", " ", " ", "R", "R", "R", " ", " ", " ", " ", " ", " "} // 아랫면 5
     };
 
-    static int[][] related = new int[][]{ // 연관되어 있는 면들
-            {0, 2, 5, 4}, // 윗면, 정면, 아랫면, 후면
-            {0, 3, 5, 1}, // 윗면, 오른쪽, 아랫면, 왼쪽
-            {2, 3, 4, 1}, // 정면, 오른쪽, 후면, 왼쪽 U
-    };
+//    static int[][] related = new int[][]{ // 연관되어 있는 면들
+//            {0, 2, 5, 4}, // 윗면, 정면, 아랫면, 후면
+//            {0, 3, 5, 1}, // 윗면, 오른쪽, 아랫면, 왼쪽
+//            {2, 3, 4, 1}, // 정면, 오른쪽, 후면, 왼쪽 U
+//    };
 
     static Point[] points = new Point[6];
+    static RelatedData horizontal = new RelatedData(); // horizontal = true
+    static RelatedData verticalFront = new RelatedData(); // horizontal = false
+    static RelatedData verticalSide = new RelatedData(); // horizontal = true, 윗면 메인
 
+    static Point[] shuffles = new Point[8];
 
-    public static void main(String[] args) { // 대다수 코드를 Practice2.java에서 가져옴
-        points[0] = new Point(3, 0); // 좌표를 저장해야 하므로 2개를 넣을 수 있는 Pair 사용
+    public static void init() {
+        points[0] = new Point(3, 0); // 좌표를 저장해야 하므로 2개를 넣을 수 있는 새 클래스 사용
         points[1] = new Point(0, 3);
         points[2] = new Point(3, 3);
         points[3] = new Point(6, 3);
         points[4] = new Point(9, 3);
         points[5] = new Point(3, 6);
 
-        RelatedData horizontal = new RelatedData(); // horizontal = true
+        shuffles[0] = new Point(0, 0);
+        shuffles[1] = new Point(1, 0);
+        shuffles[2] = new Point(2, 0);
+
+        shuffles[3] = new Point(0, 1);
+        shuffles[4] = new Point(2, 1);
+
+        shuffles[5] = new Point(0, 2);
+        shuffles[6] = new Point(1, 2);
+        shuffles[7] = new Point(2, 2);
+
         horizontal.relatedIndices = new int[] {2, 3, 4, 1}; // 정면, 오른쪽, 후면, 왼쪽 U D
+        horizontal.overallHorizontal = true;
         horizontal.lines =            new boolean[] {false, false, false, false}; // 라인을 다른 데서 읽어야 하는가?
         horizontal.directionChanged = new boolean[] {false, false, false, false}; // 방향이 달라지는가?
         horizontal.reversed =         new boolean[] {false, false, true , false}; // 반대로 읽어야 하는가?
 
-        RelatedData verticalFront = new RelatedData(); // horizontal = false
         verticalFront.relatedIndices = new int[] {0, 2, 5, 4};  // 윗면, 정면, 아랫면, 후면 L R
+        verticalFront.overallHorizontal = false;
         verticalFront.lines =            new boolean[] {false, false, false, true };
         verticalFront.directionChanged = new boolean[] {false, false, false, false};
         verticalFront.reversed =         new boolean[] {false, false, false, true };
 
-        RelatedData verticalSide = new RelatedData(); // horizontal = true, 윗면 메인
         verticalSide.relatedIndices = new int[] {0, 3, 5, 1}; // 윗면, 오른쪽, 아랫면, 왼쪽 F B
+        verticalSide.overallHorizontal = true;
         verticalSide.lines =            new boolean[] {false, true , true, false};
         verticalSide.directionChanged = new boolean[] {false, true, false, true};
         verticalSide.reversed =         new boolean[] {false, false, true , true };
+    }
+
+    public static void main(String[] args) { // 대다수 코드를 Practice2.java에서 가져옴
+        init();
 
         Scanner scan = new Scanner(System.in);
 
+        shuffle();
         printCube();
+
+        int changed = 0;
+        long start = System.currentTimeMillis();
         while (true) {
+            boolean isSame = true;
+
+            for(Point p : points) {
+                isSame &= allSame(p);
+            }
+            if(isSame) {
+                System.out.println("와~ 짝짝짝! 큐브를 모두 맞췄어요!");
+                break;
+            }
             System.out.print("CUBE > ");
             String input = scan.next();
 
@@ -61,32 +93,70 @@ public class Practice3 {
             }
 
             String[] commands = split(input); // Practice2의 코드를 비슷하게 사용 (U2같은 경우를 위한)
-            for (int i = 0; i < commands.length; i++) {
-                String command = commands[i];
-                boolean twice = command.length() == 2 && command.charAt(1) == '2';
-                boolean left = command.length() == 1 || twice;
-
-                int loopCount = twice ? 2 : 1;
-
-                for(int c = 0; c < loopCount; c++) { // U2같은 명령어 인 경우는 루프를 두번 굴림
-                    switch (command.charAt(0)) {
-                        case 'U': swap(horizontal, 0, true, left); break;
-                        case 'D': swap(horizontal, 2, true, !left); break;
-                        case 'L': swap(verticalFront, 0, false, !left); break;
-                        case 'R': swap(verticalFront, 2, false, left); break;
-                        case 'B': swap(verticalSide, 0, true, left); break;
-                        case 'F': swap(verticalSide, 2, true, !left); break;
-                    }
-                }
-
-                System.out.println(command);
-                printCube();
-                System.out.println();
+            for (String command : commands) {
+                processCommand(command);
+                changed++;
             }
+        }
+
+        System.out.println("작동 시간: " + (System.currentTimeMillis() - start) / 1000D + "초");
+        System.out.println("조작 횟수: " + changed + "회");
+    }
+
+
+    public static void shuffle() {
+        for(int i = 0; i < 10000; i++) { // 한 천번 만번쯤 랜덤으로 바꾸면 잘 바뀌지 않았을까?
+            Point p1 = selectRandomPositionForShuffle();
+            Point p2 = selectRandomPositionForShuffle();
+
+            String temp = cube[p1.y][p1.x]; // swap
+            cube[p1.y][p1.x] = cube[p2.y][p2.x];
+            cube[p2.y][p2.x] = temp;
         }
     }
 
-    public static void swap(RelatedData data, int overallLine, boolean overallhorizontal, boolean left) {
+    public static boolean allSame(Point point) {
+        for(int x = point.x; x < point.x + 3; x++) {
+            for(int y = point.y; y < point.y + 3; y++) {
+                if(!cube[point.y][point.x].equals(cube[y][x])) return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static Point selectRandomPositionForShuffle() {
+        Random random = new Random();
+
+        Point main = points[random.nextInt(6)];
+        Point plus = shuffles[random.nextInt(8)];
+
+        return new Point(main.x + plus.x, main.y + plus.y);
+    }
+
+    public static void processCommand(String command) {
+        boolean twice = command.length() == 2 && command.charAt(1) == '2';
+        boolean left = command.length() == 1 || twice;
+
+        int loopCount = twice ? 2 : 1;
+
+        for(int c = 0; c < loopCount; c++) { // U2같은 명령어 인 경우는 루프를 두번 굴림
+            switch (command.charAt(0)) {
+                case 'U': swap(horizontal, 0, left); break;
+                case 'D': swap(horizontal, 2, !left); break;
+                case 'L': swap(verticalFront, 0, !left); break;
+                case 'R': swap(verticalFront, 2, left); break;
+                case 'B': swap(verticalSide, 0, left); break;
+                case 'F': swap(verticalSide, 2, !left); break;
+            }
+        }
+
+        System.out.println(command);
+        printCube();
+        System.out.println();
+    }
+
+    public static void swap(RelatedData data, int overallLine, boolean left) {
         String[] str = new String[12];
         String[] result = new String[12];
 
@@ -94,7 +164,7 @@ public class Practice3 {
             int plate = data.relatedIndices[i];
             int line = data.lines[i] ? 2 - overallLine : overallLine;
             boolean reversed = data.reversed[i];
-            boolean horizontal = data.directionChanged[i] != overallhorizontal;
+            boolean horizontal = data.directionChanged[i] != data.overallHorizontal;
 
             Point point = points[plate];
 
@@ -115,7 +185,7 @@ public class Practice3 {
             int plate = data.relatedIndices[i];
             int line = data.lines[i] ? 2 - overallLine : overallLine;
             boolean reversed = data.reversed[i];
-            boolean horizontal = data.directionChanged[i] != overallhorizontal;
+            boolean horizontal = data.directionChanged[i] != data.overallHorizontal;
 
             Point point = points[plate];
 
@@ -226,6 +296,7 @@ class Point {
 
 class RelatedData {
     int relatedIndices[];
+    boolean overallHorizontal;
     boolean lines[];
     boolean directionChanged[]; // 수평으로 읽는가? 수직으로 읽는가?
     boolean reversed[]; // 반대로 읽어야 하는가?
